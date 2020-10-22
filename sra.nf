@@ -8,7 +8,6 @@ nextflow.enable.dsl=2
  */
 
 params.outdir = 'results'
-params.scratch_space = '/scratch'
 
 /* ############################################################################
  * Define workflow processes.
@@ -49,7 +48,7 @@ process SRA_SINGLE_FASTQ {
   mkdir -p ~/.ncbi
   printf '/LIBS/GUID = "%s"\n' `uuid` > ~/.ncbi/user-settings.mkfg
 
-  fasterq-dump --threads ${task.cpus} --temp "${params.scratch_space}" ${accession}
+  fasterq-dump --threads ${task.cpus} --temp /tmp ${accession}
   pigz --best --processes ${task.cpus} ${accession}.fastq
   """
 }
@@ -69,7 +68,7 @@ process SRA_PAIRED_FASTQ {
   mkdir -p ~/.ncbi
   printf '/LIBS/GUID = "%s"\n' `uuid` > ~/.ncbi/user-settings.mkfg
 
-  fasterq-dump --progress --threads ${task.cpus} --temp "${params.scratch_space}" ${accession}
+  fasterq-dump --progress --threads ${task.cpus} --temp /tmp ${accession}
   pigz --best --processes ${task.cpus} ${accession}_{1,2}.fastq
   """
 }

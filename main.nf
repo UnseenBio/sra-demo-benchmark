@@ -12,7 +12,7 @@ include { SRA_DOWNLOAD; SRA_SINGLE_FASTQ; SRA_PAIRED_FASTQ; } from './sra'
 params.accession = [
   ['SRR11140744', true],
   ['SRR11140746', true],
-  ['GSM465244', false]
+  ['SRR037072', false]
 ]
 params.scratch_space = '/scratch'
 params.tracedir = 'info'
@@ -37,7 +37,7 @@ workflow {
 Shotgun Sequencing Quality Control
 ==================================
 SRA Accessions: ${params.accession}
-Scratch Path: ${params.scratch_space}
+Temporary Directory: ${params.scratch_space}
 Info Path: ${params.tracedir}
 
 ************************************************************
