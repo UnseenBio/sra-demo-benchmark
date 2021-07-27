@@ -1,58 +1,46 @@
 #!/usr/bin/env nextflow
 
-nextflow.enable.dsl=2
+nextflow.enable.dsl = 2
 
-include { SRA_DOWNLOAD; SRA_SINGLE_FASTQ; SRA_PAIRED_FASTQ; } from './sra'
-
-/* ############################################################################
+/******************************************************************************
  * Default parameter values.
- * ############################################################################
- */
+ *****************************************************************************/
 
-params.accession = [
-  ['SRR11140744', true],
-  ['SRR11140746', true],
-  ['SRR037072', false]
-]
-params.scratch_space = '/scratch'
-params.tracedir = 'info'
+params.input = null
 
-/* ############################################################################
- * Define workflow processes.
- * ############################################################################
- */
+/******************************************************************************
+ * Include dependencies.
+ *****************************************************************************/
 
+include { SRA_FASTQ } from './modules/sra'
+include { PARALLEL_FASTQ } from './modules/parallel'
 
-
-/* ############################################################################
+/******************************************************************************
  * Define an implicit workflow that only runs when this is the main nextflow
  * pipeline called.
- * ############################################################################
- */
+ *****************************************************************************/
+
+if (params.input) {
+  runs = Channel
+    .fromPath(params.input, checkIfExists: true)
+    .splitCsv(header: true, sep: '\t', strip: true)
+    .map({ row -> ['id': row.run_accession] })
+} else {
+  exit 1, 'Input file with public database ids not specified!'
+}
 
 workflow {
   log.info """
 ************************************************************
 
-Shotgun Sequencing Quality Control
-==================================
-SRA Accessions: ${params.accession}
-Temporary Directory: ${params.scratch_space}
-Info Path: ${params.tracedir}
+Fetch NGS Benchmark
+===================
+Sample Sheet: ${params.input}
 
 ************************************************************
 
 """
 
-  SRA_DOWNLOAD(Channel.fromList(params.accession))
-  SRA_DOWNLOAD.out.sra.branch({
-    paired: it[1]
-      return it[0]
-    single: !it[1]
-      return it[0]
-  }).set({ download })
-
-  SRA_PAIRED_FASTQ(download.paired)
-
-  SRA_SINGLE_FASTQ(download.single)
+  SRA_FASTQ(runs)
+  PARALLEL_FASTQ(runs)
 }
