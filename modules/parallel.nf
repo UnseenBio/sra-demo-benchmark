@@ -9,6 +9,7 @@ nextflow.enable.dsl = 2
 process PARALLEL_FASTQ_DUMP {
   label 'parallel_fastq_dump'
   label 'default_process'
+  label 'error_retry'
 
   input:
   val(meta)
