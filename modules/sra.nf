@@ -7,12 +7,13 @@ nextflow.enable.dsl = 2
  *****************************************************************************/
 
 process SRA_PREFETCH {
+  tag "${meta.id}"
   label 'fasterq_dump'
   label 'minimal_process'
   label 'error_retry'
 
   input:
-  val meta
+  val(meta)
 
   output:
   tuple val(meta), path("${meta.id}/"), emit: sra
@@ -28,6 +29,7 @@ process SRA_PREFETCH {
 }
 
 process SRA_DUMP {
+  tag "${meta.id}"
   label 'fasterq_dump'
   label 'default_process'
 
@@ -52,10 +54,10 @@ process SRA_DUMP {
 
 workflow SRA_FASTQ {
   take:
-  meta
+  samples
 
   main:
-  SRA_PREFETCH(meta) | SRA_DUMP
+  SRA_PREFETCH(samples) | SRA_DUMP
 
   emit:
   reads = SRA_DUMP.out.reads

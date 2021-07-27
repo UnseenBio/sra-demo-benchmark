@@ -7,6 +7,7 @@ nextflow.enable.dsl = 2
  *****************************************************************************/
 
 process PARALLEL_FASTQ_DUMP {
+  tag "${meta.id}"
   label 'parallel_fastq_dump'
   label 'default_process'
   label 'error_retry'
@@ -29,10 +30,10 @@ process PARALLEL_FASTQ_DUMP {
 
 workflow PARALLEL_FASTQ {
   take:
-  meta
+  samples
 
   main:
-  PARALLEL_FASTQ_DUMP(meta)
+  PARALLEL_FASTQ_DUMP(samples)
 
   emit:
   reads = PARALLEL_FASTQ_DUMP.out.reads
