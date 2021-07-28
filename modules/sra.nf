@@ -24,7 +24,6 @@ process SRA_PREFETCH {
   printf '/LIBS/GUID = "%s"\n' `uuid` > ~/.ncbi/user-settings.mkfg
 
   prefetch ${meta.id}
-  vdb-validate --verbose ${meta.id}
   """
 }
 
