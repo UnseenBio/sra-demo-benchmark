@@ -8,33 +8,35 @@ nextflow.enable.dsl = 2
 
 process PARALLEL_FASTQ_DUMP {
   tag "${meta.id}"
+
   label 'parallel_fastq_dump'
   label 'default_process'
-  label 'error_retry'
+
+  maxForks 1
 
   input:
-  val(meta)
+  tuple val(meta), path(archive)
 
   output:
-  tuple val(meta), path('*.fastq'), emit: reads
+  tuple val(meta), path(output), emit: reads
 
   script:
-  """
-  parallel-fastq-dump --sra-id ${meta.id} --threads ${task.cpus} --split-e
-  """
-}
-
-/******************************************************************************
- * Define a sub-workflow for this module.
- *****************************************************************************/
-
-workflow PARALLEL_FASTQ {
-  take:
-  samples
-
-  main:
-  PARALLEL_FASTQ_DUMP(samples)
-
-  emit:
-  reads = PARALLEL_FASTQ_DUMP.out.reads
+  if (meta.compress) {
+    output = '*.fastq.gz'
+    """
+    parallel-fastq-dump --tmpdir /tmp \
+      --sra-id ${meta.id} \
+      --threads ${task.cpus} \
+      --gzip \
+      --split-e
+    """
+  } else {
+    output = '*.fastq'
+    """
+    parallel-fastq-dump --tmpdir /tmp \
+      --sra-id ${meta.id} \
+      --threads ${task.cpus} \
+      --split-e
+    """
+  }
 }
