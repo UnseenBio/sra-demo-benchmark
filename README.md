@@ -1,37 +1,63 @@
 # SRA Benchmark
 
-A benchmark pipeline that compares the performance of `prefetch` + `fasterq-dump` with `parallel-fastq-dump`.
+A nextflow benchmark pipeline that compares the performance between `fasterq-dump` and `parallel-fastq-dump` either without compression or using `fasterq-dump` + `pigz` versus `parallel-fastq-dump`'s `--gzip` flag. All combinations were tested following `prefetch`.
 
-## Usage
+![Directed, acyclic graph of the pipeline execution.](info/pipeline_dag.svg)
 
-1. Set up nextflow as [described here](https://www.nextflow.io/index.html#GetStarted).
-2. If you didn't run this pipeline in a while, possibly update nextflow itself.
+The benchmark consists of identifiers to
 
-  ```
-  nextflow self-update
-  ```
+- 30 small, single-end, 16S amplicon sequencing
+- 30 small, paired-end, 16S amplicon sequencing
+- 10 large, single-end, shotgun whole-genome sequencing
+- 10 large, paired-end, shotgun whole-genome sequencing
 
-3. Then run the pipeline.
-
-  ```
-  nextflow run main.nf -profile docker --input input/mix.tsv
-  ```
-
-## Outcome
-
-You can see the results from one run (tasks were performed sequentially to preserve bandwidth) in the [info directory](info/). In particular the [execution report](info/execution_report.html) and the figure comparing duration.
-
-![duration performance](info/duration.png)
-
-The figure shows the outcome of running the pipeline
+files. And the pipeline was run with:
 
 ```
 nextflow run main.nf -profile conda --input input/mix.tsv
 ```
 
-on a log-log scale. In general, `prefetch` + `fasterq-dump` performs better.
+## Outcome
+
+### Percent CPU
+
+Density plot of the computational resources used in percent. Four CPU cores were made available to each job. Without compression `fasterq-dump` seems to use slightly less processing power but with compression it is very similar.
+
+#### Without Compression
+
+![](figures/pcpu_density.png)
+
+#### With Compression
+
+![](figures/pcpu_density_compressed.png)
+
+### Peak Memory
+
+Either with or without compression, `fasterq-dump` uses slightly less memory than `parallel-fastq-dump`. However, in the context of genomics these are negligible numbers anyway. The pipeline was configured in a way that both processes use a memory-mapped temporary directory for their work which requires tens of GB.
+
+#### Without Compression
+
+![](figures/peak_memory_density.png)
+
+#### With Compression
+
+![](figures/peak_memory_density_compressed.png)
+
+### Duration
+
+The duration in seconds used by `fasterq-dump` (+ `pigz`) and `parallel-fastq-dump` respectively, for the same sequence, shown on log-log scale. Without compression, `parallel-fastq-dump` is faster in the majority of cases. With compression, `fasterq-dump` + `pigz` are faster. This probably means that `pigz` performs better than what is used by `fastq-dump --gzip`.
+
+#### Without Compression
+
+![](figures/duration.png)
+
+#### With Compression
+
+![](figures/duration_compressed.png)
+
+You can find the entire pipeline definition, [input files](input/mix.tsv), [detailed pipeline reports](info/), as well as the [analysis code](performance.ipynb) in this repository.
 
 ## Copyright
 
-- Copyright © 2020, Unseen Bio ApS.
+- Copyright © 2021, Unseen Bio ApS.
 - Free software distributed under the [GNU Affero General Public License version 3 or later (AGPL-3.0-or-later)](https://opensource.org/licenses/AGPL-3.0).
