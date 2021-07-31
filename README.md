@@ -57,6 +57,10 @@ The duration in seconds used by `fasterq-dump` (+ `pigz`) and `parallel-fastq-du
 
 You can find the entire pipeline definition, [input files](input/mix.tsv), [detailed pipeline reports](info/), as well as the [analysis code](performance.ipynb) in this repository.
 
+## Warning
+
+The nextflow argument `-profile docker` currently doesn't work because the certificates of the biocontainer are outdated.
+
 ## Copyright
 
 - Copyright © 2021, Unseen Bio ApS.
